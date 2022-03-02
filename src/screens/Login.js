@@ -19,6 +19,8 @@ import ButtonBox from '../components/auth/BottonBox';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import PageTitle from '../components/PageTitle';
+import { useForm } from 'react-hook-form';
+import FormError from '../components/auth/FormError';
 
 const Form = styled.form``;
 const TobBox = styled(BaseBox)`
@@ -47,6 +49,17 @@ const FacebookLogin = styled.div`
 `;
 
 function Login() {
+  const { register, watch, handleSubmit, formState, errors } = useForm({
+    mode: 'onChange',
+  }); //먼저 객체를 생성  후 register라는 함수를 불러옴
+  const onSubmitValid = (data) => {
+    console.log(data);
+  };
+  const onSubmitInValid = (data) => {
+    console.log(data);
+  };
+  // console.log(watch());
+  console.log(formState.isValid);
   return (
     <AuthLayout>
       <PageTitle title={'로그인 페이지'} />
@@ -54,10 +67,33 @@ function Login() {
         <div>
           <FontAwesomeIcon icon={faInstagram} size="3x" />
         </div>
-        <form>
-          <Input type="text" placeholder="사용자 닉네임" />
-          <Input type="password" placeholder="비밀번호" />
-          <Button type="submit" value="로그인" />
+        <form onSubmit={handleSubmit(onSubmitValid)}>
+          <Input
+            ref={register({
+              required: '아이디를 입력해주세요',
+              minLength: {
+                value: 5,
+                message: '사용자 닉네임의 길이가 5보다작습니다',
+              },
+            })}
+            name="username"
+            type="text"
+            placeholder="사용자 닉네임"
+            hasError={Boolean(errors?.username?.message)}
+          />
+          <FormError message={errors?.username?.message} />
+          <Input
+            ref={register({
+              required: '비밀번호를 입력해주세요',
+            })}
+            name="password"
+            type="password"
+            hasError={Boolean(errors?.password?.message)}
+            placeholder="비밀번호"
+          />
+          <FormError message={errors?.username?.message} />
+
+          <Button type="submit" value="로그인" disabled={!formState.isValid} />
         </form>
         <Separator />
         <FacebookLogin>
