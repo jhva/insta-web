@@ -21,6 +21,7 @@ import { Helmet } from 'react-helmet-async';
 import PageTitle from '../components/PageTitle';
 import { useForm } from 'react-hook-form';
 import FormError from '../components/auth/FormError';
+import { gql, useMutation } from '@apollo/client';
 
 const Form = styled.form``;
 const TobBox = styled(BaseBox)`
@@ -47,13 +48,27 @@ const FacebookLogin = styled.div`
     font-weight: 600;
   }
 `;
+const LOGIN_MUTATION = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      ok
+      token
+      error
+    }
+  }
+`;
 
 function Login() {
-  const { register, watch, handleSubmit, formState, errors } = useForm({
-    mode: 'onChange',
-  }); //먼저 객체를 생성  후 register라는 함수를 불러옴
+  const { register, watch, handleSubmit, formState, errors, getValues } =
+    useForm({
+      mode: 'onChange',
+    }); //먼저 객체를 생성  후 register라는 함수를 불러옴
+  const [login, { loading }] = useMutation(LOGIN_MUTATION);
   const onSubmitValid = (data) => {
-    console.log(data);
+    const { username, password } = getValues();
+    login({
+      variables: { username, password },
+    });
   };
   const onSubmitInValid = (data) => {
     console.log(data);

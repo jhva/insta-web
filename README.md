@@ -19,3 +19,12 @@ register를 사용하면 간편히사용할수있음 .
 - watch는 함수이고 value들을 보여줄수있게해주는 함수이다.
 
 !! 이때  input 안에 ref ={register}  라고 명시해준 부분들은 무조건적으로 name이들어가야한다 
+
+
+## ApollClient 로 백엔드와 연결 
+
+ -npm run dev => 후 프론트에서  ApolloCilent를 가져온후 함수 안에 url은 
+ -백엔드에 주소를 연결 그후 cache:new InMemoryCache()라고 지정해줌 
+
+ InMoryCache는 캐시는  한번 가져온정보를 기억하게해서 InMemoryCache를 사용하면 매번 같은 정보를 
+ 가져오지않도록 막아주는 기능.  
