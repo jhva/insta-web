@@ -80,12 +80,12 @@ function Login() {
       password: location?.state?.password || '',
     },
   }); //먼저 객체를 생성  후 register라는 함수를 불러옴
-  useEffect(() => {
-    if (location?.state?.message === undefined || null) {
-      return null;
-    }
-    alert(location?.state?.message);
-  }, []);
+  // useEffect(() => {
+  //   if (location?.state?.message === undefined || null) {
+  //     return null;
+  //   }
+  //   return alert(location?.state?.message);
+  // }, []);
   const onCompleted = (data) => {
     const {
       login: { ok, error, token },
