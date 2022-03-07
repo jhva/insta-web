@@ -1,4 +1,4 @@
-import { isLoggedInVar } from '../apollo';
+import { isLoggedInVar, logUserIn } from '../apollo';
 import {
   faFacebook,
   faFacebookF,
@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import routes from '../routes';
 import AuthLayout from '../components/auth/AuthLayout';
 import { BaseBox } from '../components/shared';
@@ -16,7 +16,7 @@ import Separator from '../components/auth/Separator';
 import Input from '../components/auth/Input';
 import FormBox from '../components/auth/FormBox';
 import ButtonBox from '../components/auth/BottonBox';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import PageTitle from '../components/PageTitle';
 import { useForm } from 'react-hook-form';
@@ -57,15 +57,55 @@ const LOGIN_MUTATION = gql`
     }
   }
 `;
+const Notification = styled.div`
+  color: red;
+`;
 
 function Login() {
-  const { register, watch, handleSubmit, formState, errors, getValues } =
-    useForm({
-      mode: 'onChange',
-    }); //먼저 객체를 생성  후 register라는 함수를 불러옴
-  const [login, { loading }] = useMutation(LOGIN_MUTATION);
+  const location = useLocation();
+  console.log(location);
+  const {
+    register,
+    watch,
+    handleSubmit,
+    formState,
+    errors,
+    getValues,
+    setError,
+    clearErrors, // 에러메세지 사라지게하는 함수
+  } = useForm({
+    mode: 'onChange',
+    defaultValues: {
+      username: location?.state?.username || '',
+      password: location?.state?.password || '',
+    },
+  }); //먼저 객체를 생성  후 register라는 함수를 불러옴
+  useEffect(() => {
+    if (location?.state?.message === undefined || null) {
+      return null;
+    }
+    alert(location?.state?.message);
+  }, []);
+  const onCompleted = (data) => {
+    const {
+      login: { ok, error, token },
+    } = data;
+    if (!ok) {
+      return setError('result', { message: error });
+    }
+    if (token) {
+      logUserIn(token);
+    }
+    console.log(data);
+  };
+  const [login, { loading }] = useMutation(LOGIN_MUTATION, { onCompleted });
+
   const onSubmitValid = (data) => {
+    if (loading) {
+      return;
+    }
     const { username, password } = getValues();
+
     login({
       variables: { username, password },
     });
@@ -73,8 +113,10 @@ function Login() {
   const onSubmitInValid = (data) => {
     console.log(data);
   };
-  // console.log(watch());
   console.log(formState.isValid);
+  const clearLoginError = () => {
+    clearErrors('result');
+  };
   return (
     <AuthLayout>
       <PageTitle title={'로그인 페이지'} />
@@ -82,6 +124,7 @@ function Login() {
         <div>
           <FontAwesomeIcon icon={faInstagram} size="3x" />
         </div>
+
         <form onSubmit={handleSubmit(onSubmitValid)}>
           <Input
             ref={register({
@@ -91,6 +134,7 @@ function Login() {
                 message: '사용자 닉네임의 길이가 5보다작습니다',
               },
             })}
+            onChange={clearLoginError}
             name="username"
             type="text"
             placeholder="사용자 닉네임"
@@ -101,6 +145,7 @@ function Login() {
             ref={register({
               required: '비밀번호를 입력해주세요',
             })}
+            onChange={clearLoginError}
             name="password"
             type="password"
             hasError={Boolean(errors?.password?.message)}
@@ -108,7 +153,13 @@ function Login() {
           />
           <FormError message={errors?.username?.message} />
 
-          <Button type="submit" value="로그인" disabled={!formState.isValid} />
+          <Button
+            type="submit"
+            value={loading ? '로딩중' : '로그인'}
+            disabled={!formState.isValid || loading}
+            // disabled={!formState.isValid}
+          />
+          <FormError message={errors?.result?.message} />
         </form>
         <Separator />
         <FacebookLogin>
