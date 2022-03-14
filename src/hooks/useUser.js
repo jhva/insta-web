@@ -5,6 +5,7 @@ import { isLoggedInVar, logOutUserIn } from '../apollo';
 const ME_QUERY = gql`
   query me {
     me {
+      id
       username
       avatar
     }
@@ -22,6 +23,6 @@ function useUser() {
       logOutUserIn();
     }
   }, [data]);
-  return;
+  return { data };
 }
 export default useUser;
